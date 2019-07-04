@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     secretkeeper (0.1.0)
-      rails (>= 4.0)
+      rails (>= 4)
 
 GEM
   remote: https://rubygems.org/
@@ -57,18 +57,18 @@ GEM
     generator_spec (0.9.4)
       activesupport (>= 3.0.0)
       railties (>= 3.0.0)
-    globalid (0.4.1)
+    globalid (0.4.2)
       activesupport (>= 4.2.0)
     i18n (0.8.6)
     loofah (2.0.3)
       nokogiri (>= 1.5.9)
-    mail (2.7.0)
+    mail (2.7.1)
       mini_mime (>= 0.1.1)
     method_source (0.8.2)
-    mini_mime (1.0.0)
+    mini_mime (1.0.1)
     mini_portile2 (2.2.0)
     minitest (5.10.3)
-    nio4r (2.1.0)
+    nio4r (2.3.1)
     nokogiri (1.8.0)
       mini_portile2 (~> 2.2.0)
     rack (2.0.3)
@@ -119,7 +119,7 @@ GEM
       rspec-mocks (~> 3.6.0)
       rspec-support (~> 3.6.0)
     rspec-support (3.6.0)
-    sprockets (3.7.1)
+    sprockets (3.7.2)
       concurrent-ruby (~> 1.0)
       rack (> 1, < 3)
     sprockets-rails (3.2.1)
@@ -132,17 +132,17 @@ GEM
       thread_safe (~> 0.1)
     websocket-driver (0.6.5)
       websocket-extensions (>= 0.1.0)
-    websocket-extensions (0.1.3)
+    websocket-extensions (0.1.4)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
-  factory_girl_rails
-  generator_spec
-  rspec-activemodel-mocks
-  rspec-rails
+  factory_girl_rails (~> 4.8)
+  generator_spec (~> 0.9.4)
+  rspec-activemodel-mocks (~> 1.0)
+  rspec-rails (~> 3.6)
   secretkeeper!
 
 BUNDLED WITH
-   1.15.4
+   1.16.3
