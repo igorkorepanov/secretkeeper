@@ -5,9 +5,9 @@ end
 Secretkeeper.reflect do |on|
   on.resource_owner do |params|
     case params[:resource_owner]
-    when "Admin"
+    when 'Admin'
       Admin.authenticate!(params[:name], params[:password])
-    when "User"
+    when 'User'
       User.authenticate!(params[:name], params[:password])
     else
     end

@@ -1,0 +1,33 @@
+# inherit_from: .rubocop_todo.yml
+
+require:
+  - rubocop-performance
+  - rubocop-rails
+  - rubocop-rspec
+
+AllCops:
+  TargetRubyVersion: 2.5
+  Exclude:
+    - bin/*
+    - config/**/*
+    - db/**/*
+    - Gemfile
+    - spec/dummy/**/*
+    - lib/generators/secretkeeper/templates/*
+
+Metrics/LineLength:
+  Exclude:
+    - spec/spec_helper.rb
+    - secretkeeper.gemspec
+
+Metrics/BlockLength:
+  ExcludedMethods: ['describe', 'context']
+
+Style/Documentation:
+  Enabled: false
+
+RSpec/MultipleExpectations:
+  Max: 5
+
+RSpec/ExampleLength:
+  Max: 10
