@@ -1,41 +1,45 @@
+# frozen_string_literal: true
+
 module Secretkeeper
   class AuthController < ActionController::Metal
     include AbstractController::Rendering
-    include ActionController::Rendering
-    include ActionController::Renderers
     include ActionController::Head
+    include ActionController::Renderers
+    include ActionController::Rendering
 
     use_renderers :json
 
     def create_token
       resource_owner = Secretkeeper.reflection_resource_owner.call(params)
-      if resource_owner.present?
-        access_token = Secretkeeper::AccessToken.create(owner: resource_owner)
-        render json: {
-          access_token: access_token.token,
-          expires_in: access_token.expires_in,
-          refresh_token: access_token.refresh_token,
-          created_at: access_token.created_at.to_i
-        }, status: 201
-      else
-        head 401
-      end
+
+      return head 401 if resource_owner.nil?
+
+      @access_token = Secretkeeper::AccessToken.create(owner: resource_owner)
+      render json: success, status: 201
     end
 
     def refresh_token
-      token = Secretkeeper::AccessToken.find_by(refresh_token: params[:refresh_token])
-      if token.present? && token.refreshable?
-        token.revoke!
-        new_token = Secretkeeper::AccessToken.create(owner: token.owner)
-        render json: {
-          access_token: new_token.token,
-          expires_in: new_token.expires_in,
-          refresh_token: new_token.refresh_token,
-          created_at: DateTime.now.to_i
-        }
-      else
-        head 403
-      end
+      return head 403 unless old_token&.refreshable?
+
+      old_token.revoke!
+      @access_token = Secretkeeper::AccessToken.create(owner: old_token.owner)
+      render json: success
+    end
+
+    private
+
+    def success
+      {
+        access_token: @access_token.token,
+        expires_in: @access_token.expires_in,
+        refresh_token: @access_token.refresh_token,
+        created_at: @access_token.created_at.to_i
+      }
+    end
+
+    def old_token
+      @old_token ||=
+        Secretkeeper::AccessToken.find_by(refresh_token: params[:refresh_token])
     end
   end
 end

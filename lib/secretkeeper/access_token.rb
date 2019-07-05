@@ -1,23 +1,23 @@
+# frozen_string_literal: true
+
 module Secretkeeper
   class AccessToken < ::ActiveRecord::Base
-    self.table_name = "secretkeeper_access_tokens"
+    self.table_name = 'secretkeeper_access_tokens'
+
     belongs_to :owner, polymorphic: true
 
     def initialize(attributes = {})
-      access_token, refresh_token, expires_in = nil
       loop do
-        access_token = AccessToken.generate
-        refresh_token = AccessToken.generate
-        break unless AccessToken.exists?(token: access_token, refresh_token: refresh_token)
+        @access_token = AccessToken.generate
+        @r_token = AccessToken.generate
+        break unless token_exists?
       end
-      expires_in = Secretkeeper.configuration.access_token_expires_in
-      super((attributes || {}).merge({
-        token: access_token, refresh_token: refresh_token, expires_in: expires_in
-      }))
+      @token_expires_in = Secretkeeper.configuration.access_token_expires_in
+      super((attributes || {}).merge(token_params))
     end
 
     def revoke!
-      revoked_at.nil? && update_attribute(:revoked_at, DateTime.now)
+      revoked_at.nil? && update(revoked_at: Time.zone.now)
     end
 
     def accessible?
@@ -29,7 +29,7 @@ module Secretkeeper
     end
 
     def expired?
-      created_at + expires_in.seconds <= DateTime.now
+      created_at + expires_in.seconds <= Time.zone.now
     end
 
     def refreshable?
@@ -38,6 +38,22 @@ module Secretkeeper
 
     def self.generate
       SecureRandom.hex(32)
+    end
+
+    private
+
+    attr_reader :access_token, :r_token, :token_expires_in
+
+    def token_exists?
+      AccessToken.exists?(token: access_token, refresh_token: r_token)
+    end
+
+    def token_params
+      {
+        token: access_token,
+        refresh_token: r_token,
+        expires_in: token_expires_in
+      }
     end
   end
 end

@@ -1,103 +1,93 @@
-require "spec_helper"
+# frozen_string_literal: true
 
-RSpec.describe Secretkeeper::AccessToken, type: :model do
+require 'spec_helper'
+
+describe Secretkeeper::AccessToken, type: :model do
+  include ActiveSupport::Testing::TimeHelpers
+
+  let(:token_expire_time) { 1.minute }
+  let(:token) { create(:access_token) }
+
   before do
-    allow(Secretkeeper.configuration).to receive(:access_token_expires_in).and_return(1.minute)
+    allow(Secretkeeper.configuration).to receive(:access_token_expires_in)
+      .and_return(token_expire_time)
   end
 
-  context "initialize" do
-    it "initialize a model instance" do
-      token = build(:access_token)
-      expect(token.token).to be_a String
-      expect(token.refresh_token).to be_a String
-      expect(token.token.length).to eq 64
-      expect(token.refresh_token.length).to eq 64
-      expect(token.revoked_at).to eq nil
-    end
+  describe '#initialize' do
+    let(:token) { described_class.create(token: 1, refresh_token: 2) }
 
-    it "creates a model instance" do
-      token = create(:access_token)
-      expect(token.token).to be_a String
-      expect(token.refresh_token).to be_a String
-      expect(token.token.length).to eq 64
-      expect(token.refresh_token.length).to eq 64
-    end
-
-    it "overrides initial attributes" do
-      token = Secretkeeper::AccessToken.create({token: 1, refresh_token: 2})
-      expect(token.token).to be_a String
-      expect(token.refresh_token).to be_a String
-      expect(token.token.length).to eq 64
-      expect(token.refresh_token.length).to eq 64
+    it 'creates model instance' do
+      aggregate_failures do
+        expect(token.token).to be_a String
+        expect(token.refresh_token).to be_a String
+        expect(token.token.length).to eq 64
+        expect(token.refresh_token.length).to eq 64
+      end
     end
   end
 
-  context "revoke!" do
-    it "revokes refresh_token" do
-      token = create(:access_token)
-      expect(token.revoke!).to be true
-      expect(token.revoked_at).to be <= DateTime.now
+  describe '#revoke!' do
+    it 'revokes refresh_token' do
+      freeze_time do
+        aggregate_failures do
+          expect(token.revoke!).to be_truthy
+          expect(token.revoked_at).to eq Time.zone.now
+        end
+      end
     end
 
-    it "can't be revoked twice" do
-      token = create(:access_token)
-      expect(token.revoke!).to be true
-      expect(token.revoke!).to be false
-    end
-  end
-
-  context "accessible?" do
-    it "should be accessible" do
-      token = create(:access_token)
-      expect(token.accessible?).to be true
-    end
-
-    it "creates expired access token" do
-      token = create(:access_token, { expires_in: 100.years.ago })
-      expect(token.accessible?).to be false
+    it 'cannot be revoked twice' do
+      aggregate_failures do
+        expect(token.revoke!).to be_truthy
+        expect(token.revoke!).to be_falsey
+      end
     end
   end
 
-  context "revoked?" do
-    it "returns false" do
-      token = create(:access_token)
-      expect(token.revoked?).to be false
-    end
+  describe '#accessible?' do
+    it { expect(token).to be_accessible }
 
-    it "returns true" do
-      token = create(:access_token, { revoked_at: 1.year.ago })
-      expect(token.revoked?).to be true
-    end
-  end
+    it 'creates expired access token' do
+      token = create(
+        :access_token,
+        created_at: Time.zone.now - token_expire_time,
+        expires_in: token_expire_time
+      )
 
-  context "expired?" do
-    it "returns false" do
-      token = create(:access_token)
-      expect(token.expired?).to be false
-    end
-
-    it "returns true" do
-      token = create(:access_token, { created_at: 1.year.ago })
-      expect(token.expired?).to be true
+      expect(token).not_to be_accessible
     end
   end
 
-  context "refreshable?" do
-    it "returns true" do
-      token = create(:access_token)
-      expect(token.refreshable?).to be true
-    end
+  describe '#revoked?' do
+    it { expect(token).not_to be_revoked }
 
-    it "returns false (revoked token)" do
-      token = create(:access_token)
+    it 'returns true' do
+      token = create(:access_token, revoked_at: 1.year.ago)
+      expect(token).to be_revoked
+    end
+  end
+
+  describe '#expired?' do
+    it { expect(token).not_to be_expired }
+
+    it 'returns true' do
+      token = create(:access_token, created_at: 1.year.ago)
+      expect(token).to be_expired
+    end
+  end
+
+  describe '#refreshable?' do
+    it { expect(token).to be_refreshable }
+
+    it 'returns false when the token is revoked' do
       token.revoke!
-      expect(token.refreshable?).to be false
+      expect(token).not_to be_refreshable
     end
   end
 
-  context "self.generate" do
-    it "generates a hex string" do
-      str = Secretkeeper::AccessToken.generate
+  describe '.generate' do
+    it 'generates a hex string' do
+      str = described_class.generate
       expect(str).to be_a String
       expect(str.length).to eq 64
     end

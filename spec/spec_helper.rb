@@ -1,21 +1,23 @@
-ENV["RAILS_ENV"] ||= "test"
+# frozen_string_literal: true
 
-require "dummy/config/environment"
-abort("The Rails environment is running in production mode!") if Rails.env.production?
-require "rspec/rails"
-require "factory_girl_rails"
-require "rspec/active_model/mocks"
+ENV['RAILS_ENV'] ||= 'test'
+
+require 'dummy/config/environment'
+abort('The Rails environment is running in production mode!') if Rails.env.production?
+require 'rspec/rails'
+require 'rspec/json_expectations'
+require 'factory_bot'
 
 ActiveRecord::Migration.verbose = false
-load Rails.root + "db/schema.rb"
+load Rails.root + 'db/schema.rb'
 
-FactoryGirl.definition_file_paths << File.join(File.dirname(__FILE__), "factories")
+FactoryBot.definition_file_paths << File.join(File.dirname(__FILE__), 'factories')
 
-FactoryGirl.factories.clear
-FactoryGirl.find_definitions  
+FactoryBot.factories.clear
+FactoryBot.find_definitions
 
 RSpec.configure do |config|
-  config.include FactoryGirl::Syntax::Methods
+  config.include FactoryBot::Syntax::Methods
 
   config.infer_spec_type_from_file_location!
 
@@ -23,5 +25,5 @@ RSpec.configure do |config|
 
   config.use_transactional_fixtures = true
 
-  config.order = "random"
+  config.order = 'random'
 end

@@ -3,7 +3,7 @@ class HomeController < ActionController::API
 
   def protected_action
     render json: {
-      resource_owner: @resource_owner
+      resource_owner: @resource_owner.name
     }
   end
 end
