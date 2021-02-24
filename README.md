@@ -1,3 +1,5 @@
+[![Actions Status](https://github.com/igorkorepanov/secretkeeper/workflows/CI/badge.svg?branch=master)](https://github.com/igorkorepanov/secretkeeper/actions?query=workflow%3ACI)
+
 # Secretkeeper
 Token based authentication.
 
