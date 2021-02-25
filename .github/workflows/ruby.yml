@@ -32,6 +32,8 @@ jobs:
         run: bundle exec rubocop --parallel
       - name: Brakeman
         run: bundle exec brakeman -q --color --no-exit-on-error
+      - name: Bundler-audit
+        run: bundle exec bundle-audit check --update
   tests:
     name: Tests
     runs-on: ubuntu-latest
