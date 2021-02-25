@@ -18,6 +18,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'rails', '>= 4'
 
+  s.add_development_dependency 'brakeman', '~> 5.0.0'
   s.add_development_dependency 'factory_bot', '~> 5.0', '>= 5.0.2'
   s.add_development_dependency 'generator_spec', '~> 0.9.4'
   s.add_development_dependency 'rspec-json_expectations', '~> 2.2', '>= 2.2.0'
